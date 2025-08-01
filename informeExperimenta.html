@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Control de Cámara - Informe Técnico</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --border-color: #bdc3c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            margin: 2rem 0;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .component-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .component-title {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .specs-table th,
+        .specs-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .specs-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .specs-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            border: 2px dashed var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #3498db10, #2980b910);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .problem-box {
+            background: linear-gradient(135deg, #e74c3c10, #c0392b10);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .solution-box {
+            background: linear-gradient(135deg, #27ae6010, #229a5c10);
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .formula {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid var(--secondary-color);
+            margin: 1rem 0;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            padding: 0.5rem 0;
+            display: block;
+            border-bottom: 1px solid #eee;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: var(--primary-color);
+        }
+
+        .diagram-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .energy-calculation {
+            background: #fff;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Control de Cámara</h1>
+            <p class="subtitle">Informe Técnico Experimental - Automatización de Aforos Vehiculares</p>
+        </header>
+
+        <nav class="toc">
+            <h3 style="margin-top: 0;">Tabla de Contenidos</h3>
+            <ul>
+                <li><a href="#resumen">1. Resumen del Proyecto</a></li>
+                <li><a href="#problema">2. Descripción del Problema</a></li>
+                <li><a href="#objetivos">3. Objetivos del Proyecto</a></li>
+                <li><a href="#arquitectura">4. Arquitectura del Sistema</a></li>
+                <li><a href="#componentes">5. Componentes y Especificaciones</a></li>
+                <li><a href="#consumo">6. Análisis de Consumo Energético</a></li>
+                <li><a href="#funcionamiento">7. Funcionamiento del sistema</a></li>
+                <li><a href="#problemas">8. Problemas Identificados</a></li>
+                <li><a href="#soluciones">9. Soluciones Propuestas</a></li>
+            </ul>
+        </nav>
+
+        <section id="resumen" class="section">
+            <h2>1. Resumen del Proyecto</h2>
+            <div class="highlight-box">
+                <p><strong>Objetivo:</strong> Desarrollar un sistema autónomo de control y grabación de video para aforos vehiculares utilizando tecnología IoT.</p>
+                <p><strong>Duración de operación:</strong> 24-48 horas continuas</p>
+                <p><strong>Características principales:</strong> Alimentación solar, conectividad 4G, control remoto, gestión térmica automática</p>
+            </div>
+            
+            <p>Este proyecto implementa una solución integral para la automatización de aforos vehiculares mediante un sistema de grabación de video completamente autónomo. El sistema integra una cámara Tapo C500, alimentación por batería LiFePO4 con carga solar, conectividad 4G/WiFi, y control automatizado vía ESP32 con gestión remota a través de AdaFruit IO.</p>
+        </section>
+
+        <section id="problema" class="section">
+            <h2>2. Descripción del Problema</h2>
+            <p>Los aforos vehiculares tradicionales requieren presencia humana constante y dependencia de infraestructura eléctrica fija. Para superar estas limitaciones, el proyecto aborda los siguientes desafíos técnicos:</p>
+            
+            <div class="component-card">
+                <h3 style="color: var(--primary-color); margin-top: 0;">Autonomía energética</h3>
+                <p>Dado que los aforos se realizan en distintas zonas de la ciudad, el sistema debe ser completamente autónomo y no depender de la red eléctrica convencional. Por tanto, se incorporó una batería recargable de litio hierro fosfato (LiFePO4), conocida por su estabilidad y seguridad, que proporciona la energía necesaria para el funcionamiento continuo del sistema.</p>
+            </div>
+
+            <div class="component-card">
+                <h3 style="color: var(--primary-color); margin-top: 0;">Conectividad remota vía Wi-Fi</h3>
+                <p>La cámara utilizada, modelo Tapo C500, permite la conexión a redes Wi-Fi para consultar en tiempo real el estado del vídeo, verificar si está grabando correctamente, revisar el encuadre, entre otros aspectos. Para asegurar esta conectividad en zonas en las cuales la cámara no tiene acceso a Wi-Fi, se integró un router portátil que opera con una tarjeta SIM de datos móviles, brindando red inalámbrica exclusiva para la cámara.</p>
+            </div>
+
+            <div class="component-card">
+                <h3 style="color: var(--primary-color); margin-top: 0;">Control automatizado del encendido</h3>
+                <p>Debido a la logística de instalación (frecuentemente en postes o semáforos y con antelación al momento del aforo), fue necesario diseñar un sistema de programación del encendido y apagado automático. Para esto se utilizó una tarjeta de desarrollo ESP32, que ofrece conectividad Wi-Fi y permite recibir instrucciones remotas mediante una plataforma web (dashboard) de AdaFruit IO. Gracias a este control, es posible definir con precisión los horarios de grabación, optimizando el uso de energía, especialmente en jornadas largas de monitoreo de 24 a 48 horas.</p>
+            </div>
+
+            <div class="component-card">
+                <h3 style="color: var(--primary-color); margin-top: 0;">Gestión térmica del sistema</h3>
+                <p>Para prevenir el sobrecalentamiento dentro de la caja estanca donde se aloja la electrónica, se incorporó un ventilador de 12 VDC y 0.15 A, controlado también desde el microcontrolador, que se activa cuando inicia el aforo.</p>
+            </div>
+
+            <div class="component-card">
+                <h3 style="color: var(--primary-color); margin-top: 0;">Sistema de carga solar inteligente</h3>
+                <p>La batería se alimenta mediante un panel solar conectado a un controlador de carga solar PWM, el cual se encarga de regular el proceso de carga de manera segura, adaptada a las necesidades específicas de las baterías LiFePO4, prolongando su vida útil y evitando daños por sobrecarga o descarga profunda.</p>
+            </div>
+
+            <div class="component-grid" style="margin-top: 2rem;">
+                <div class="">
+                    <img src="images/antes.jpeg" 
+                    alt="Aforo tradicional" 
+                    style="width: 100%; max-width: 500px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                </div>
+                <div class="">
+                    <img src="images/despues.jpeg" 
+                    alt="Aforo actual" 
+                    style="width: 100%; max-width: 500px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                </div>
+            </div>
+        </section>
+
+        <section id="objetivos" class="section">
+            <h2>3. Objetivos del Proyecto</h2>
+            <h3>Objetivo General</h3>
+            <p>Diseñar e implementar un sistema autónomo de control de cámara para grabación de video en aforos vehiculares, eliminando la dependencia de infraestructura eléctrica y permitiendo operación remota programable.</p>
+            
+            <h3>Objetivos Específicos</h3>
+            <ul>
+                <li>Implementar autonomía energética mediante batería LiFePO4 y panel solar</li>
+                <li>Establecer conectividad remota independiente de infraestructura local</li>
+                <li>Desarrollar control automatizado con programación horaria</li>
+                <li>Optimizar consumo energético para operación de 24-48 horas</li>
+            </ul>
+        </section>
+
+        <section id="arquitectura" class="section">
+            <h2>4. Arquitectura del Sistema</h2>
+            <div class="diagram-container">
+                <div class="" style="height: 500px;">
+                    <img src="images/esquema.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 76%; max-width: 900px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>Análisis del Diagrama de Conexiones:</h4>
+                <p>El diagrama muestra la integración completa del sistema, destacando:</p>
+                <ul>
+                    <li><strong>Alimentación centralizada:</strong> Panel solar → Controlador PWM → Batería 12.8V como fuente principal</li>
+                    <li><strong>Distribución de voltajes:</strong> Tres reguladores LM2596 para generar los diferentes niveles (12V router y ventilador, 9V cámara, 5V sistema de control)</li>
+                    <li><strong>Control inteligente:</strong> ESP32 como cerebro del sistema, gestionando el módulo de relés HW-316 para control de cada subsistema</li>
+                    <li><strong>Modularidad:</strong> Cada componente puede ser controlado independientemente vía relés</li>
+                    <li><strong>Seguridad:</strong> Switch manual de emergencia para desconexión total del sistema</li>
+                    <li><strong>Separación física:</strong> Componentes de potencia (batería, controlador) separados de electrónica sensible</li>
+                </ul>
+            </div>
+            
+            <h3>Componentes Principales</h3>
+            <div class="component-grid">
+                <div class="component-card">
+                    <div class="component-title">Subsistema de Alimentación</div>
+                    <p>Batería LiFePO4 12.8V 20Ah con carga solar controlada PWM</p>
+                </div>
+                <div class="component-card">
+                    <div class="component-title">Subsistema de Grabación</div>
+                    <p>Cámara Tapo C500 con almacenamiento local SD 128GB y transmisión WiFi</p>
+                    <div class="highlight-box" style="margin-top: 1rem; padding: 1rem; font-size: 0.9em;">
+                        <p><strong>Nota sobre almacenamiento en nube:</strong> El almacenamiento en la nube lo brinda la aplicación de TAPO. Sin embargo, requiere activar la detección de vehículos y personas para capturar motos, lo cual incrementa significativamente el consumo de datos móviles y, por consecuencia, el consumo energético del router. En pruebas previas, esto resultó en una reducción notable de la autonomía del sistema.</p>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="component-title">Subsistema de Conectividad</div>
+                    <p>Router 4G/WiFi H3S con tarjeta SIM para acceso remoto independiente</p>
+                </div>
+                <div class="component-card">
+                    <div class="component-title">Subsistema de Control</div>
+                    <p>ESP32 (2.4GHz WiFi) con RTC para automatización y módulo de relés HW-316 para control de dispositivos</p>
+                </div>
+                <div class="component-card">
+                    <div class="component-title">Subsistema Térmico</div>
+                    <p>Ventilador 12V controlado para gestión de temperatura</p>
+                    <div class="highlight-box" style="margin-top: 1rem; padding: 1rem; font-size: 0.9em;">
+                        <p><strong>Consideración de diseño:</strong> Se evaluó la incorporación de sensores de temperatura al interior de la caja para monitoreo térmico avanzado. Sin embargo, se decidió no implementarlo para evitar incrementar el consumo energético del sistema, priorizando la autonomía operativa.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="componentes" class="section">
+            <h2>5. Componentes y Especificaciones Técnicas</h2>
+            
+            <h3>5.1 Sistema de Alimentación</h3>
+            <div class="component-card">
+                <div class="component-title">Batería LiFePO4 ECO-WORTHY 12.8V 20Ah</div>
+                <table class="specs-table">
+                    <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                    <tr><td>Modelo</td><td>ECO-LFPYZ122001</td><td>-</td></tr>
+                    <tr><td>Capacidad</td><td>20</td><td>Ah</td></tr>
+                    <tr><td>Energía total</td><td>256</td><td>Wh</td></tr>
+                    <tr><td>Voltaje nominal</td><td>12.8</td><td>V</td></tr>
+                    <tr><td>Voltaje máximo carga</td><td>14.6</td><td>V</td></tr>
+                    <tr><td>Voltaje mínimo descarga</td><td>10</td><td>V</td></tr>
+                    <tr><td>Corriente máxima carga/descarga</td><td>20</td><td>A</td></tr>
+                    <tr><td>Peso</td><td>2.2</td><td>kg</td></tr>
+                </table>
+                <div class="center">
+                    <img src="images/bateria.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 76%; max-width: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                </div>
+            </div>
+
+            <div class="component-card">
+                <div class="component-title">Panel Solar OSDA 80W</div>
+                <table class="specs-table">
+                    <tr><th>Parámetro</th><th>Valor</th><th>Unidad</th></tr>
+                    <tr><td>Modelo</td><td>OD80W-16 SM</td><td>-</td></tr>
+                    <tr><td>Potencia nominal (Pmax)</td><td>80</td><td>W</td></tr>
+                    <tr><td>Voltaje máxima potencia (Vmp)</td><td>19.14</td><td>V</td></tr>
+                    <tr><td>Corriente máxima potencia (Imp)</td><td>4.18</td><td>A</td></tr>
+                    <tr><td>Voltaje circuito abierto (Voc)</td><td>22.52</td><td>V</td></tr>
+                    <tr><td>Corriente cortocircuito (Isc)</td><td>4.46</td><td>A</td></tr>
+                    <tr><td>Dimensiones</td><td>650×868×30</td><td>mm</td></tr>
+                    <tr><td>Peso</td><td>4.56</td><td>kg</td></tr>
+                </table>
+                <div class="">
+                    <img src="images/panel2.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 100%; max-width: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                </div>
+                </div>
+            </div>
+
+            <h3>5.2 Sistema de Grabación y Conectividad</h3>
+            <div class="component-grid">
+                <div class="component-card">
+                    <div class="component-title">Cámara Tapo C500</div>
+                    <ul>
+                        <li><strong>Alimentación:</strong> 9V 1A (9W aprox.)</li>
+                        <li><strong>Conectividad:</strong> Wi-Fi 802.11n</li>
+                        <li><strong>Grabación:</strong> 24/7 con almacenamiento local</li>
+                        <li><strong>Consumo estimado:</strong> 7-9W</li>
+                        <li><strong>Características:</strong> Visión nocturna, detección movimiento</li>
+                    </ul>
+                    <div class="">
+                        <img src="images/camara.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 100%; max-width: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Router Wi-Fi 3G/4G H3S</div>
+                    <ul>
+                        <li><strong>Alimentación:</strong> USB 5V 1A (5W)</li>
+                        <li><strong>Consumo típico:</strong> 4-6W</li>
+                        <li><strong>Conectividad:</strong> SIM 3G/4G, WiFi local</li>
+                        <li><strong>Función:</strong> Puente de conectividad para cámara</li>
+                    </ul>
+                    <div class="">
+                        <img src="images/router.jpeg" 
+                        alt="Conexiones" 
+                        style="width: 100%; max-width: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                    </div>
+                </div>
+            </div>
+
+            <h3>5.3 Sistema de Control y Regulación</h3>
+            <div class="component-grid">
+                <div class="component-card">
+                    <div class="component-title">ESP32 + Módulo RTC DS3231</div>
+                    <ul>
+                        <li><strong>Alimentación:</strong> 3.3V o 5V</li>
+                        <li><strong>Consumo operación:</strong> 160-400mA (WiFi activo)</li>
+                        <li><strong>Potencia estimada:</strong> 1.5-2W</li>
+                        <li><strong>Funciones:</strong> Control relés, programación horaria, comunicación IoT</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Reguladores LM2596 (3 unidades)</div>
+                    <ul>
+                        <li><strong>Tipo:</strong> Buck converter (Step-down)</li>
+                        <li><strong>Entrada:</strong> hasta 40V</li>
+                        <li><strong>Salidas:</strong> 5V (router), 9V (cámara), 5V (relés)</li>
+                        <li><strong>Eficiencia:</strong> 70-85%</li>
+                    </ul>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-title">Módulo Relés HW-316</div>
+                    <ul>
+                        <li><strong>Canales:</strong> 4 (usando solo 3)</li>
+                        <li><strong>Voltaje operación:</strong> 5V</li>
+                        <li><strong>Consumo por canal:</strong> ~70mA</li>
+                        <li><strong>Control:</strong> Cámara, Router, Ventilador</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="">
+                <img src="images/rtc.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 100%; max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                <img src="images/reles.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 70%; max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                <img src="images/esp.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 100%; max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                <img src="images/regulador.jpeg" 
+                    alt="Conexiones" 
+                    style="width: 120%; max-width: 330px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+            </div>
+        </section>
+
+        <section id="consumo" class="section">
+            <h2>6. Análisis de Consumo Energético</h2>
+            
+            <h3>6.1 Consumo por Componente</h3>
+            <div class="highlight-box">
+                <h4>Configuración del Sistema de Alimentación:</h4>
+                <p>El panel solar alimenta la batería a través del controlador de carga solar PWM, mientras que la batería alimenta directamente todo el circuito electrónico del sistema. Esta configuración garantiza un suministro estable y regulado de energía.</p>
+            </div>
+            
+            <table class="specs-table">
+                <tr><th>Componente</th><th>Voltaje (V)</th><th>Corriente (A)</th><th>Potencia (W)</th><th>% del Total</th><th>Estado</th></tr>
+                <tr><td>Router H3S</td><td>12</td><td>1.0</td><td>12.0</td><td>40.7%</td><td>Continuo</td></tr>
+                <tr><td>Cámara Tapo C500</td><td>9</td><td>0.85</td><td>7.65</td><td>25.9%</td><td>Continuo</td></tr>
+                <tr><td>Reguladores LM2596 (pérdidas)</td><td>-</td><td>-</td><td>3.93</td><td>13.3%</td><td>Continuo</td></tr>
+                <tr><td>ESP32 + RTC</td><td>5</td><td>0.4</td><td>2.0</td><td>6.8%</td><td>Continuo</td></tr>
+                <tr><td>Ventilador</td><td>12</td><td>0.15</td><td>1.8</td><td>6.1%</td><td>Intermitente</td></tr>
+                <tr><td>Módulo Relés (3 canales)</td><td>5</td><td>0.21</td><td>1.05</td><td>3.6%</td><td>Continuo</td></tr>
+                <tr><td><strong>TOTAL</strong></td><td>-</td><td>-</td><td><strong>29.5</strong></td><td><strong>100%</strong></td><td>-</td></tr>
+            </table>
+
+            <div class="energy-calculation">
+                <h4>Análisis Detallado del Consumo:</h4>
+                <p><strong>Componentes de mayor impacto energético:</strong></p>
+                <ul>
+                    <li><strong>Router 4G H3S (40.7%):</strong> Mayor consumidor individual. La transmisión de datos móviles y creación de red WiFi local requieren potencia significativa.</li>
+                    <li><strong>Cámara Tapo C500 (25.9%):</strong> Segundo mayor consumidor. Su grabación continua 24/7 y conectividad WiFi representan un drain energético considerable.</li>
+                    <li><strong>Pérdidas en reguladores (13.3%):</strong> Conversión de voltaje de 12.8V a niveles requeridos (5V, 9V, 12V) genera pérdidas inherentes.</li>
+                    <li><strong>Sistema de control (10.4%):</strong> ESP32, RTC y relés en conjunto representan un consumo base constante.</li>
+                </ul>
+                
+                <div class="highlight-box" style="margin-top: 1rem;">
+                    <p><strong>Estrategias de optimización identificadas:</strong></p>
+                    <ul>
+                        <li>Implementar Deep Sleep en ESP32 para reducir consumo base</li>
+                        <li>Control inteligente del router (apagado nocturno programado)</li>
+                        <li>Uso de reguladores de mayor eficiencia (>90%)</li>
+                        <li>Gestión dinámica del ventilador basada en temperatura real</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>6.2 Cálculo de Autonomía</h3>
+            <div class="energy-calculation">
+                <h4>Escenario Base (sin optimizaciones):</h4>
+                <div class="formula">
+                    Autonomía = Energía_Batería / Consumo_Total<br>
+                    Autonomía = 256 Wh / 29.5 W = 8.7 horas
+                </div>
+                
+                <h4>Escenario Optimizado (ESP32 Deep Sleep):</h4>
+                <div class="formula">
+                    Consumo_Deep_Sleep = 29.5W - 2W + 0.01W = 27.51W<br>
+                    Autonomía_Optimizada = 256 Wh / 27.51 W = 9.3 horas
+                </div>
+            </div>
+
+            <div class="problem-box">
+                <h4>⚠️ Problema Identificado</h4>
+                <p>La autonomía calculada (8.7-9.3 horas) es insuficiente para los requerimientos del proyecto (24-48 horas). Se requieren optimizaciones adicionales o mayor capacidad de batería.</p>
+            </div>
+
+            <h3>6.3 Contribución de Carga Solar y Autonomía</h3>
+            <div class="highlight-box">
+                <p><strong>Análisis de autonomía bajo diferentes condiciones climáticas:</strong></p>
+                <p>La generación solar varía significativamente según las condiciones meteorológicas, afectando directamente las horas de grabación disponibles.</p>
+            </div>
+
+            <div class="energy-calculation">
+                <h4>Escenario 1: Condiciones Óptimas</h4>
+                <ul>
+                    <li><strong>Irradiación solar:</strong> 6 horas de sol directo</li>
+                    <li><strong>Generación diaria:</strong> 80W × 6h = 480 Wh/día</li>
+                    <li><strong>Balance energético:</strong> +480 Wh - 708 Wh = -228 Wh/día (déficit)</li>
+                    <li><strong>Horas de grabación continua:</strong> 480 Wh ÷ 29.5W = <strong>16.3 horas</strong></li>
+                    <li><strong>Autonomía total:</strong> (256 Wh + 480 Wh) ÷ 29.5W = <strong>24.9 horas</strong></li>
+                </ul>
+            </div>
+
+            <div class="energy-calculation">
+                <h4>Escenario 2: Condiciones Reales</h4>
+                <ul>
+                    <li><strong>Irradiación solar:</strong> 4 horas promedio (nubes parciales)</li>
+                    <li><strong>Generación diaria:</strong> 80W × 4h = 320 Wh/día</li>
+                    <li><strong>Balance energético:</strong> +320 Wh - 708 Wh = -388 Wh/día (déficit)</li>
+                    <li><strong>Horas de grabación continua:</strong> 320 Wh ÷ 29.5W = <strong>10.8 horas</strong></li>
+                    <li><strong>Autonomía total:</strong> (256 Wh + 320 Wh) ÷ 29.5W = <strong>19.5 horas</strong></li>
+                </ul>
+            </div>
+
+            <div class="energy-calculation">
+                <h4>Escenario 3: Condiciones Adversas</h4>
+                <ul>
+                    <li><strong>Irradiación solar:</strong> 2 horas (nublado/lluvia)</li>
+                    <li><strong>Generación diaria:</strong> 80W × 2h = 160 Wh/día</li>
+                    <li><strong>Balance energético:</strong> +160 Wh - 708 Wh = -548 Wh/día (déficit severo)</li>
+                    <li><strong>Horas de grabación continua:</strong> 160 Wh ÷ 29.5W = <strong>5.4 horas</strong></li>
+                    <li><strong>Autonomía total:</strong> (256 Wh + 160 Wh) ÷ 29.5W = <strong>14.1 horas</strong></li>
+                </ul>
+            </div>
+
+            <div class="problem-box">
+                <h4>Factores Climáticos que Afectan la Generación Solar:</h4>
+                <ul>
+                    <li><strong>Nubosidad:</strong> Reduce la irradiación entre 20-80% según densidad</li>
+                    <li><strong>Lluvia:</strong> Puede reducir generación hasta 90% durante precipitación</li>
+                    <li><strong>Polvo/suciedad:</strong> Acumulación en panel reduce eficiencia 5-15%</li>
+                    <li><strong>Temperatura:</strong> Altas temperaturas (>25°C) reducen eficiencia del panel</li>
+                    <li><strong>Ángulo e inclinación:</strong> Orientación no óptima puede reducir generación 10-30%</li>
+                    <li><strong>Sombreado parcial:</strong> Objetos cercanos pueden reducir significativamente la generación</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <p><strong>Conclusión energética:</strong> El sistema requiere condiciones óptimas de sol para alcanzar cerca de 25 horas de operación. En condiciones reales (4h sol), la autonomía se reduce a 19.5 horas, y en condiciones adversas solo alcanza 14.1 horas, muy por debajo de los requerimientos de 24-48 horas.</p>
+            </div>
+        </section>
+
+        <section id="funcionamiento" class="section">
+            <h2>7. Funcionamiento del Sistema</h2>
+            
+            <div class="highlight-box">
+                <h4>Secuencia de Operación Completa:</h4>
+                <p>El sistema opera siguiendo una secuencia automatizada diseñada para optimizar el consumo energético y garantizar la grabación programada de aforos.</p>
+            </div>
+
+            <h3>Fase 1: Encendido Inicial</h3>
+            <div class="component-card">
+                <div class="component-title">Activación Manual del Sistema</div>
+                <ol>
+                    <li><strong>Switch manual:</strong> El operador activa el interruptor principal del sistema</li>
+                    <li><strong>Encendido completo:</strong> Se alimentan todos los componentes simultáneamente:
+                        <ul>
+                            <li>Cámara Tapo C500</li>
+                            <li>Router 4G/Wi-Fi H3S</li>
+                            <li>ESP32 + módulo RTC</li>
+                            <li>Sistema de relés</li>
+                            <li>Ventilador (si es necesario)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Inicialización:</strong> Todos los sistemas inician sus rutinas de arranque</li>
+                </ol>
+            </div>
+
+            <h3>Fase 2: Conexión y Configuración</h3>
+            <div class="component-card">
+                <div class="component-title">Establecimiento de Conectividad</div>
+                <ol>
+                    <li><strong>Búsqueda de red Wi-Fi:</strong> 
+                        <ul>
+                            <li>ESP32 inicia proceso de búsqueda de red Wi-Fi</li>
+                            <li>Se conecta al router 4G como punto de acceso local</li>
+                            <li>El router establece conexión con la red móvil vía SIM</li>
+                        </ul>
+                    </li>
+                    <li><strong>Conexión a AdaFruit IO:</strong>
+                        <ul>
+                            <li>ESP32 se conecta a la plataforma IoT AdaFruit</li>
+                            <li>Recibe configuración de horarios de aforos programados</li>
+                            <li>Sincroniza fecha/hora con el módulo RTC</li>
+                        </ul>
+                    </li>
+                    <li><strong>Estado de espera:</strong> Sistema queda listo para recibir comando "Iniciar Sistema"</li>
+                </ol>
+            </div>
+
+            <h3>Fase 3: Modo de Bajo Consumo</h3>
+            <div class="component-card">
+                <div class="component-title">Activación del Modo Sleep</div>
+                <p><strong>Comando "Iniciar Sistema" desde AdaFruit IO:</strong></p>
+                <ol>
+                    <li><strong>Apagado controlado:</strong> ESP32 desactiva relés para apagar:
+                        <ul>
+                            <li>Ventilador (relay 1)</li>
+                            <li>Router 4G (relay 2)</li>
+                            <li>Cámara Tapo C500 (relay 3)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Deep Sleep Mode:</strong>
+                        <ul>
+                            <li>ESP32 entra en modo de ultra bajo consumo</li>
+                            <li>Mantiene activo solo el temporizador RTC</li>
+                            <li>Consumo se reduce de ~23W a ~0.5W</li>
+                        </ul>
+                    </li>
+                    <li><strong>Monitoreo temporal:</strong> RTC mantiene seguimiento de hora programada para aforo</li>
+                </ol>
+            </div>
+
+            <h3>Fase 4: Despertar Automático</h3>
+            <div class="component-card">
+                <div class="component-title">Activación por Horario</div>
+                <ol>
+                    <li><strong>Alarma RTC:</strong> Módulo RTC activa señal de despertar cuando llega la hora programada</li>
+                    <li><strong>Wake-up ESP32:</strong> Microcontrolador sale del modo Deep Sleep</li>
+                    <li><strong>Secuencia de encendido:</strong>
+                        <ul>
+                            <li>Activa relay del router (conexión 4G/Wi-Fi)</li>
+                            <li>Espera conexión de red (~30-60 segundos)</li>
+                            <li>Activa relay de la cámara (inicio de grabación)</li>
+                            <li>Activa relay del ventilador (si temperatura > umbral)</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>Fase 5: Operación de Aforo</h3>
+            <div class="component-card">
+                <div class="component-title">Grabación y Monitoreo Activo</div>
+                <ul>
+                    <li><strong>Grabación continua:</strong> Cámara graba video en SD 128GB y opcionalmente en nube</li>
+                    <li><strong>Conectividad permanente:</strong> Wi-Fi queda activo durante todo el aforo</li>
+                    <li><strong>Acceso remoto:</strong> Posibilidad de consultar video en tiempo real vía app TAPO</li>
+                    <li><strong>Programación dinámica:</strong> Capacidad de recibir nuevos aforos o modificaciones</li>
+                    <li><strong>Monitoreo de sistema:</strong> ESP32 supervisa voltaje de batería y temperatura</li>
+                </ul>
+            </div>
+
+            <div class="problem-box">
+                <h4>⚠️ Limitación Crítica del Sistema</h4>
+                <p><strong>Pérdida de programación por descarga completa:</strong></p>
+                <ul>
+                    <li>Si la batería se descarga completamente (≤10V), el sistema se apaga totalmente</li>
+                    <li>Se pierde toda la información de aforos programados almacenada en RAM</li>
+                    <li>Requiere reprogramación manual desde AdaFruit IO tras recarga</li>
+                    <li><strong>Solución futura:</strong> Implementar almacenamiento no volátil (EEPROM/Flash) para persistencia de datos</li>
+                </ul>
+            </div>
+
+            <div class="diagram-container">
+                <div class="" style="height: 400px;">
+                    <img src="images/dashboard.png" 
+                    alt="Conexiones" 
+                    style="width: 120%; max-width: 1000px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                </div>
+            </div>
+        </section>
+            
+
+        <section id="problemas" class="section">
+            <h2>8. Problemas Identificados</h2>
+            
+            <div class="problem-box">
+                <h3>8.1 Insuficiencia Energética</h3>
+                <p><strong>Problema:</strong> La autonomía calculada (11.8-13.0h) no alcanza los requerimientos de 24-48h.</p>
+                <p><strong>Causas:</strong></p>
+                <ul>
+                    <li>Alto consumo de cámara y router (14W combinados)</li>
+                    <li>Pérdidas en reguladores de voltaje (~15%)</li>
+                    <li>Capacidad limitada de batería (256Wh)</li>
+                </ul>
+            </div>
+
+            <div class="problem-box">
+                <h3>8.2 Dependencia Climática</h3>
+                <p><strong>Problema:</strong> Carga solar variable según condiciones meteorológicas.</p>
+                <p><strong>Impacto:</strong> En días nublados, la generación puede reducirse hasta 160Wh/día, insuficiente para mantener operación continua.</p>
+            </div>
+        </section>
+
+        <section id="soluciones" class="section">
+            <h2>9. Soluciones Propuestas</h2>
+            
+            <div class="solution-box">
+                <h3>9.1 Alimentación Directa Panel-Circuito</h3>
+                <h4>Descripción:</h4>
+                <p>Para maximizar las horas de grabación, se propone configurar el sistema para que durante el día el panel solar alimente y cargue simultáneamente el circuito, mientras que durante la noche la batería sea la única fuente de alimentación.</p>
+                
+                <h4>Beneficios Esperados:</h4>
+                <ul>
+                    <li><strong>Aprovechamiento directo:</strong> Uso inmediato de la energía solar sin pérdidas de conversión batería-carga-descarga</li>
+                    <li><strong>Preservación de batería:</strong> Menor número de ciclos de carga/descarga durante horas diurnas</li>
+                    <li><strong>Mayor autonomía nocturna:</strong> Batería con mayor carga disponible para operación nocturna</li>
+                    <li><strong>Eficiencia mejorada:</strong> Reducción de pérdidas energéticas en el proceso de almacenamiento</li>
+                </ul>
+                
+                <div class="highlight-box" style="margin-top: 1rem;">
+                    <p><strong>Estado actual:</strong> Esta opción se tiene en consideración como mejora futura, pero aún no se ha llevado a cabo la implementación debido a la complejidad del control automático de conmutación entre fuentes.</p>
+                </div>
+            </div>
+
+            <div class="solution-box">
+                <h3>9.2 Monitoreo de Consumo con Módulo INA219</h3>
+                <h4>Descripción:</h4>
+                <p>Implementar medición precisa del consumo energético mediante un módulo sensor INA219 para monitoreo en tiempo real de corriente, voltaje y potencia del sistema.</p>
+                
+                <h4>Características del Módulo INA219:</h4>
+                <ul>
+                    <li><strong>Medición simultánea:</strong> Voltaje, corriente y potencia calculada</li>
+                    <li><strong>Precisión:</strong> ±0.5% en medición de corriente</li>
+                    <li><strong>Rango de medición:</strong> 0-26V, 0-3.2A (ampliable con shunt externo)</li>
+                    <li><strong>Comunicación I2C:</strong> Fácil integración con ESP32</li>
+                    <li><strong>Bajo consumo:</strong> <1mA de consumo propio</li>
+                </ul>
+                
+                <h4>Beneficios:</h4>
+                <ul>
+                    <li><strong>Datos precisos:</strong> Medición real vs estimaciones teóricas</li>
+                    <li><strong>Optimización basada en datos:</strong> Identificación de componentes con mayor consumo real</li>
+                    <li><strong>Monitoreo remoto:</strong> Datos enviados via IoT a AdaFruit para análisis</li>
+                    <li><strong>Predicción de autonomía:</strong> Cálculo dinámico de tiempo restante de operación</li>
+                    <li><strong>Detección de fallas:</strong> Identificación de consumos anómalos</li>
+                </ul>
+            </div>
+        </section>
+
+        
+
+        <footer style="text-align: center; margin-top: 3rem; padding: 2rem; border-top: 1px solid var(--border-color); color: #666;">
+            <p><strong>Informe Técnico - Sistema de Control de Cámara</strong></p>
+            <p>Proyecto de Automatización de Aforos Vehiculares</p>
+            <p>Versión 1.0 - Enero 2025</p>
+            <p style="margin-top: 1rem; font-size: 0.9em;">
+                Para más información técnica o colaboraciones, contactar al equipo de desarrollo.<br>
+                Repositorio del proyecto: <em>[Enlace a GitHub cuando esté disponible]</em>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Navegación suave
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Resaltado de sección activa en navegación
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.toc a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.fontWeight = 'normal';
+                link.style.color = 'var(--secondary-color)';
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.style.fontWeight = 'bold';
+                    link.style.color = 'var(--primary-color)';
+                }
+            });
+        });
+
+        // Animaciones al hacer scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section, .component-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
